@@ -1,11 +1,12 @@
 #for linux machine
 #pip install pycryptodome
+#sudo apt install python3-pip
 
 #for windows machine
 #pip install pycryptodomex --no-binary :all:
 #--no-use-wheel
-#pip install pycryptodome
-#sudo apt install python3-pip
+
+
  
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
