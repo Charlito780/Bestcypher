@@ -21,7 +21,7 @@
     <header id="header" class="animated slideInDown" style="animation-delay:1.8s;">
         <table>
             <tr>
-                <td id="logo">Sky security.</td>
+                <td id="logo" ><a href="http://127.0.0.1:5500/siteweb/index.html" onmouseover="window.status = ' '">Sky security.</a></td>
                 <td id="navigation">
                     <a href="#work">work</a>
                     <a href="#bio">about</a>
@@ -63,42 +63,58 @@
                         <form method="post"
                             onsubmit="return false;">
                             <div>
-                                <input type="text"
-                                    placeholder="email" />
-                                 
-                                <br />
-                                <input type="password"
-                                    placeholder="password" />
+                                <div>
+                                    <input type="text" name="user_email" id="signup_email"
+                                        placeholder="email" />
+                                    <br />
+                                    <input type="password" name="user_password" id="signup_password"
+                                        placeholder="password" />
+                                </div>
+                            </div>
                             </div>
                         </form>
      
                         <button id="LeftToRight"
                             class="on-off">Login
                         </button>
+                        <script>
+                            // Mettez le code Sign Up/Login ici.
+                        </script>
                          
                         <button>Register</button>
+                        <script>
+                            // Mettez le code Sign Up/register ici.
+                        </script>
                     </div>
                 </div>
      
                 <div class="right">
                     <div class="content">
                         <h2>Login</h2>
-                        <form method="post"
+                        <form method="post" 
                             onsubmit="return false;">
                             <div>
-                                <input type="text"
+                                <input type="text" name="user_email" id="login_email"
                                     placeholder="email" />
                                  
                                 <br />
-                                <input type="password"
+                                <input type="password" name="user_password" id="login_password"
                                     placeholder="password" />
                             </div>
      
                             <button id="RightToLeft"
                                 class="on-off">Register
                             </button>
+                            <script>
+                                // Mettez le code Login/register ici.
+                            </script>
                              
                             <button>Login</button>
+                            <script>
+                                // Mettez le code Login/login ici.
+                            </script>
+                            
+                            
                         </form>
                     </div>
                 </div>
@@ -154,6 +170,145 @@
     <div id="footer">
         made on earth by a human <br> <a href="https://imfunniee.github.io">imfunniee</a>
     </div>
+    
     <script src="connexion.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/pyodible/v0.18.0 full/">
+        async function main() { // async necessaire avec await
+            const pyodibde = await loadPyodide({
+                indexURL : "https://cdn.jsdelivr.net/pyodible/v0.18.0 full/"
+            });
+
+            const  signup_email= document.getElementById("signup_email").value;
+            const  signup_password= document.getElementById("signup_password").value;
+            const  login_email= document.getElementById("login_email").value;
+            const  login_password= document.getElementById("login_password").value;
+        pyodide.runPython(`
+            #for linux machine
+            #pip install pycryptodome
+            #sudo apt install python3-pip
+
+            #for windows machine
+            #pip install pycryptodomex --no-binary :all:
+            #--no-use-wheel
+
+
+            
+            from fileinput import close
+            from Crypto.PublicKey import RSA
+            from Crypto.Cipher import PKCS1_OAEP
+            import binascii
+            import ast
+            import os
+
+            def generation_clefs():
+                #generation clefs public et privée
+                keyPair = RSA.generate(3072)
+                pubKey = keyPair.publickey()
+                # .exportKey() transforme en PKCK#8 : la syntaxe de clef la plus répendue
+                pubKeyPEM = pubKey.exportKey()
+                privKeyPEM = keyPair.exportKey()
+                creation_fichier(nom_fichier = "pubKey")
+                ecrire_alasuite("pubKey", "Public key: (n="+hex(pubKey.n)+" e=" +hex(pubKey.e)+")")
+                ecrire_alasuite("pubKey", '\r' + pubKeyPEM.decode('ascii'))
+
+                creation_fichier(nom_fichier = "privKey")
+                ecrire_alasuite("privKey", "Private key: (n="+hex(pubKey.n)+" d=" +hex(keyPair.d)+")")
+                ecrire_alasuite("privKey", '\r' + privKeyPEM.decode('ascii'))
+                return pubKey,keyPair, pubKeyPEM, privKeyPEM
+
+            
+            #fction encryptage   
+            def encryptage(pubKey):
+                #msg = 'A message for encryption'
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/msg.txt"
+                file=open(conc,'r')
+                msg=str(file.readlines())
+                file.close
+                #fction d'encriptage en elle même
+                encryptor = PKCS1_OAEP.new(pubKey)
+                encrypted = encryptor.encrypt(msg.encode('utf-8'))
+                #Ecriture dans "/Encrypte_str.txt"
+                #print("Encrypted:", binascii.hexlify(encrypted))
+                conc=path+"/Encrypte_str.txt"
+                file=open(conc, "w")
+                file.write(str(bytes(encrypted)))
+                file.close
+                return encrypted
+
+            #AH... la fction qui bug
+            #decryptage enregistré => peut-etre inutil
+            def decryptage(nomFichier,keyPair,pubKey):
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/"+nomFichier+".txt"
+                file=open(conc,'r')
+                encryted=file.readline()
+                encrypted=conc.join([l.rstrip for l in file])
+                file.close
+                #fction de decriptage en elle même
+                decryptor = PKCS1_OAEP.new(keyPair)
+                decrypted= decryptor.decrypt(ast.literal_eval(str(encrypted)))
+                conc=path+"/decryptage.txt"
+                #print("creation fich:", conc)
+                file=open(conc, "w")
+                file.write(str(binascii(encrypted)))
+                file.close
+                return decrypted
+
+            def creation_fichier(nomFichier):
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/"+nomFichier+".txt"
+                file=open(conc,"w")
+                file.close
+                return
+
+            def ecraser(nomFichier, a_ecrire):
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/"+nomFichier+".txt"
+                file=open(conc,"w")
+                file.write(a_ecrire)
+                file.close
+            def ecrire_alasuite(nomFichier, a_ecrire):
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/"+nomFichier+".txt"
+                file=open(conc,"a")
+                file.write(a_ecrire)
+                path = os.path.abspath(os.getcwd())
+                conc=path+"/"+nomFichier+".txt"
+                file=open(conc, 'a')
+                file.write(a_ecrire)
+                file.close
+
+            #ouvre un fichier d'addresse"File_Name" sinon il faut donner toute l'adresse
+            #File_object = open (r "File_Name", "Access_Mode")
+
+
+            #MAIN (temporaire)
+            #=> attention message definit par defaut dans main et nn demandé a utilisateur  (TEMPORAIRE)
+            def main() :
+                #données demandées a utilisiateur (util pour encryption)
+                msg = 'A message for encryption'
+                ecraser("le message", msg)
+                #Appel fonctions
+                pubKey,keyPair,pubKeyPEM,privKeyPEM=generation_clefs()
+                encrypted = encryptage(pubKey)
+                decrypted = decryptage("Encryte_str",keyPair,pubKey)
+
+                #Affichage console (Temporaire) : sera implementé en .txt >> file.read()
+                #print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
+                #print(pubKeyPEM.decode('ascii'))
+                #print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
+                #print(privKeyPEM.decode('ascii'))
+                #print("Encrypted:", binascii.hexlify(encrypted))
+                #print("Decrypted:", str(decrypted))
+                    `)
+        alert(signup_email);
+        alert(signup_password);
+        alert(login_email);
+        alert(login_password);
+         // autant que lon veux :
+         // console.log(pyodide.runPython((" code python");
+         main();
+    }</script>
 </body>
 </html>
